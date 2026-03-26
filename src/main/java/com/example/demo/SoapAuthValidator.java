@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 @Service
 public class SoapAuthValidator {
 
-    @Value("${soap.validate.url}")
+    @Value("${soap.service.url}")
     private String soapValidateUrl;
 
     public boolean validateToken(String token) {
