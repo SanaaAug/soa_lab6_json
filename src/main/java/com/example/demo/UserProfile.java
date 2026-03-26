@@ -27,4 +27,7 @@ public class UserProfile {
     private String bio;
     private String phone;
     private String address;
+    
+    @Column(name="photo_url")
+    private String photoUrl;
 }
