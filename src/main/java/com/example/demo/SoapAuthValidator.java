@@ -7,14 +7,18 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
+// /upload endpoint-д token шалгахад ашиглах SOAP клиент
 @Service
 public class SoapAuthValidator {
 
+    // SOAP сервисийн хаяг (application.properties-с авна)
     @Value("${soap.service.url}")
     private String soapValidateUrl;
 
+    // Token хүчинтэй эсэхийг SOAP сервис рүү шалгана
     public boolean validateToken(String token) {
         try {
+            // XML injection-оос хамгаалж token-ийг escape хийнэ
             String safeToken = token
                 .replace("&", "&amp;")
                 .replace("<", "&lt;")
@@ -33,6 +37,7 @@ public class SoapAuthValidator {
                     + "</soapenv:Body>"
                     + "</soapenv:Envelope>";
 
+            // SOAP сервис рүү POST хүсэлт илгээнэ
             HttpURLConnection conn = (HttpURLConnection) new URL(soapValidateUrl).openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "text/xml;charset=UTF-8");
@@ -45,6 +50,7 @@ public class SoapAuthValidator {
             int responseCode = conn.getResponseCode();
             if (responseCode == 200) {
                 String resp = new String(conn.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+                // Хариунд <success>true</success> байвал token хүчинтэй
                 return resp.contains("<success>true</success>");
             }
         } catch (Exception e) {

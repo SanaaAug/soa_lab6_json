@@ -13,6 +13,7 @@ import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URI;
 
+// DigitalOcean Spaces (S3-тэй нийцтэй) руу файл байршуулах сервис
 @Service
 public class FileService {
 
@@ -22,6 +23,7 @@ public class FileService {
     @Value("${s3.secret.key}")
     private String secretKey;
 
+    // DigitalOcean Spaces endpoint хаяг
     @Value("${s3.endpoint}")
     private String endpoint;
 
@@ -30,6 +32,7 @@ public class FileService {
 
     private S3Client s3;
 
+    // Application эхлэхэд S3 клиент үүсгэнэ
     @PostConstruct
     public void init() {
         AwsBasicCredentials creds = AwsBasicCredentials.create(accessKey, secretKey);
@@ -37,11 +40,14 @@ public class FileService {
             .endpointOverride(URI.create(endpoint))
             .credentialsProvider(StaticCredentialsProvider.create(creds))
             .region(Region.of("sgp1"))
+            // DigitalOcean Spaces path-style URL ашиглана
             .forcePathStyle(true)
             .build();
     }
 
+    // Файлыг S3-д байршуулж нийтийн URL буцаана
     public String uploadFile(MultipartFile file) throws IOException {
+        // Нэр давхцахаас сэргийлж timestamp нэмнэ
         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
         PutObjectRequest request = PutObjectRequest.builder()
@@ -49,11 +55,13 @@ public class FileService {
             .key(fileName)
             .contentType(file.getContentType())
             .contentLength(file.getSize())
+            // Нийтэд харагдахаар тохируулна
             .acl("public-read")
             .build();
 
         s3.putObject(request, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
+        // Файлын нийтийн URL буцаана
         return endpoint + "/" + bucketName + "/" + fileName;
     }
 }

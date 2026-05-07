@@ -124,6 +124,33 @@ public class ProfileController {
         return ResponseEntity.ok(response);
     }
 
+    // ==================== UPDATE PHOTO ====================
+    @PatchMapping("/photo")
+    public ResponseEntity<Map<String, Object>> updatePhoto(
+            @RequestBody Map<String, String> body,
+            HttpServletRequest request) {
+
+        Map<String, Object> response = new HashMap<>();
+        Long userId = (Long) request.getAttribute("userId");
+
+        Optional<UserProfile> profileOpt = profileRepository.findByUserId(userId);
+
+        if (profileOpt.isEmpty()) {
+            response.put("success", false);
+            response.put("message", "Profile олдсонгүй!");
+            return ResponseEntity.status(404).body(response);
+        }
+
+        UserProfile profile = profileOpt.get();
+        // Зургийн URL шинэчлэх
+        profile.setPhotoUrl(body.get("photoUrl"));
+        profileRepository.save(profile);
+
+        response.put("success", true);
+        response.put("data", profile);
+        return ResponseEntity.ok(response);
+    }
+
     // ==================== DELETE ====================
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Object>> deleteProfile(
